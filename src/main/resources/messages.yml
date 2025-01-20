@@ -1,0 +1,21 @@
+####################################
+#
+# Файл с параметрами перевода
+# Создатель - ReoGenT (https://vk.com/dzekmant)
+#
+# mc.fraqmine.ru
+####################################
+
+prefix: "[<gradient:#C8FF00:#BAE4DD>Hammer</gradient>] "
+reload_message: "<gradient:#0079FF:#BAE4DD>Конфигурация перезагружена!</gradient>"
+missing_arg: "<gradient:#FF0000:#BAE4DD>Использование: /hammer <reload|..></gradient>"
+error_message: "<gradient:#FF0000:#BAE4DD>Команда была введена неверно!</gradient>"
+
+# Следующие переменные не поддерживают MiniMessage!
+hammer:
+  name: "&e&lБУЛАВА"
+  lore: "&7Когда в ведущей руке:\n &27 Урон\n &22.1 Скорость атаки"
+
+breeze:
+  name: "&f&lВихрь"
+  lore: ""

@@ -1,0 +1,12 @@
+name: Hammer
+version: '${project.version}'
+main: com.reogent.hammer.Hammer
+api-version: '1.16'
+depend: [NBTAPI]
+
+commands:
+  hammer:
+    description: "Основная команда"
+    usage: "/hammer"
+    permission: "hammer.admin"
+    permission-message: "&cУ вас нет прав на использование этой команды!"
