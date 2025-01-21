@@ -14,4 +14,5 @@ public class LangGetter {
     public String hammer_lore = configLang.getConfig().getString("hammer.lore");
     public String breeze_name = configLang.getConfig().getString("breeze.name");
     public String breeze_lore = configLang.getConfig().getString("breeze.lore");
+
 }

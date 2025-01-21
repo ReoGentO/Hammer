@@ -25,13 +25,6 @@
           <configuration>
               <source>11</source>
               <target>11</target>
-              <annotationProcessorPaths>
-                  <path>
-                      <groupId>org.projectlombok</groupId>
-                      <artifactId>lombok</artifactId>
-                      <version>1.18.30</version>
-                  </path>
-              </annotationProcessorPaths>
           </configuration>
       </plugin>
         <plugin>
@@ -96,6 +89,10 @@
           <id>jitpack.io</id>
           <url>https://jitpack.io</url>
       </repository>
+      <repository>
+          <id>xenondevs</id>
+          <url>https://repo.xenondevs.xyz/releases</url>
+      </repository>
   </repositories>
 
   <dependencies>
@@ -133,19 +130,15 @@
           <scope>provided</scope>
       </dependency>
       <dependency>
-          <groupId>io.github.rysefoxx.inventory</groupId>
-          <artifactId>RyseInventory-Plugin</artifactId>
-          <version>1.5.7</version>
-      </dependency>
-      <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok-maven-plugin</artifactId>
-          <version>1.16.12.0</version>
-      </dependency>
-      <dependency>
           <groupId>com.google.code.findbugs</groupId>
           <artifactId>jsr305</artifactId>
           <version>3.0.2</version>
+      </dependency>
+      <dependency>
+          <groupId>xyz.xenondevs.invui</groupId>
+          <artifactId>invui</artifactId>
+          <version>1.25</version>
+          <type>pom</type>
       </dependency>
   </dependencies>
 </project>

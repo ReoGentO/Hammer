@@ -1,16 +1,12 @@
 package com.reogent.hammer;
 
-import com.reogent.hammer.Listeners.InventoryOpenListener;
 import com.reogent.hammer.Listeners.ItemListeners;
 import com.reogent.hammer.Listeners.MoveListener;
+import com.reogent.hammer.Listeners.PlayerLiseners;
 import com.reogent.hammer.commands.HammerCommand;
 import com.reogent.hammer.commands.HammerTabCompleter;
 import de.tr7zw.nbtapi.NBT;
-import io.github.rysefoxx.inventory.plugin.pagination.InventoryManager;
-import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,12 +16,6 @@ public final class Hammer extends JavaPlugin {
     private ConfigManager mainconfig;
     private ConfigManager langconfig;
     public static Hammer instance;
-    public static MiniMessage mm = MiniMessage.miniMessage();
-
-    @Getter
-    private final InventoryManager manager = new InventoryManager(this);
-
-
     private BukkitAudiences audiences;
 
     public BukkitAudiences adventure() {
@@ -51,12 +41,11 @@ public final class Hammer extends JavaPlugin {
         mainconfig = new ConfigManager(this, "config.yml");
         langconfig = new ConfigManager(this, "messages.yml");
         instance = this;
-        manager.invoke();
         this.audiences = BukkitAudiences.create(this);
         getLogger().info("Плагин успешно загрузился!");
         Bukkit.getPluginManager().registerEvents(new MoveListener(), this);
         Bukkit.getPluginManager().registerEvents(new ItemListeners(), this);
-        Bukkit.getPluginManager().registerEvents(new InventoryOpenListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerLiseners(), this);
         getCommand("hammer").setExecutor(new HammerCommand());
         getCommand("hammer").setTabCompleter(new HammerTabCompleter());
 
@@ -92,7 +81,4 @@ public final class Hammer extends JavaPlugin {
         getServer().getPluginManager().enablePlugin(this);
     }
 
-    public InventoryManager getManager() {
-        return manager;
-    }
 }

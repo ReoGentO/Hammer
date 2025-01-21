@@ -16,7 +16,7 @@ public class HammerTabCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("menu", "sendmessage", "give");
+            return Arrays.asList("adminmenu", "sendmessage", "give");
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("give")) {
             List<String> completions = new ArrayList<>();

@@ -1,6 +1,5 @@
 package com.reogent.hammer.Utils;
 
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
  * @author Rysefoxx | Rysefoxx#6772
  * @since 1/18/2022
  */
-@NoArgsConstructor
 public class ItemBuilder {
 
     private final HashMap<String, Object> data = new HashMap<>();

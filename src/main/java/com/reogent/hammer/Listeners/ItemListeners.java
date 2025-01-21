@@ -1,5 +1,7 @@
 package com.reogent.hammer.Listeners;
 
+import com.reogent.hammer.ConfigGetter;
+import com.reogent.hammer.ConfigManager;
 import com.reogent.hammer.Hammer;
 import com.reogent.hammer.Utils.LangGetter;
 import com.reogent.hammer.Utils.ParticleUtils;
@@ -37,63 +39,68 @@ public class ItemListeners implements Listener {
 
     @EventHandler
     public void PlayerMove(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
-        Location from = event.getFrom();
-        Location to = event.getTo();
-        if (to==null) return;
+        if (ConfigGetter.config.getConfig().getBoolean("enable_hammer")) {
+            Player player = event.getPlayer();
+            Location from = event.getFrom();
+            Location to = event.getTo();
+            if (to==null) return;
 
-        ItemStack item = player.getInventory().getItemInMainHand();
-        if (item == null || item.getType() == Material.AIR) return;
-        boolean isHammer = NBT.get(item, nbt -> (boolean) nbt.getBoolean("isHammer"));
+            ItemStack item = player.getInventory().getItemInMainHand();
+            if (item == null || item.getType() == Material.AIR) return;
+            boolean isHammer = NBT.get(item, nbt -> (boolean) nbt.getBoolean("isHammer"));
 
-        double fallThreshold = -0.5;
-        if (isHammer && from.getY() > to.getY() && player.getVelocity().getY() < fallThreshold) {
-            double currentFallDistance = fallDistance.getOrDefault(player, 0.0);
-            double fallDelta = Math.abs(to.getY() - from.getY());
-            fallDistance.put(player, currentFallDistance + fallDelta);
-            fallCounters.put(player, fallCounters.getOrDefault(player, 0.0) + 0.2);
-            player.setFallDistance(0);
-        } else if (fallCounters.containsKey(player)) {
-            fallCounters.remove(player);
-            fallDistance.remove(player);
+            double fallThreshold = -0.5;
+            if (isHammer && from.getY() > to.getY() && player.getVelocity().getY() < fallThreshold) {
+                double currentFallDistance = fallDistance.getOrDefault(player, 0.0);
+                double fallDelta = Math.abs(to.getY() - from.getY());
+                fallDistance.put(player, currentFallDistance + fallDelta);
+                fallCounters.put(player, fallCounters.getOrDefault(player, 0.0) + 0.2);
+                player.setFallDistance(0);
+            } else if (fallCounters.containsKey(player)) {
+                fallCounters.remove(player);
+                fallDistance.remove(player);
+            }
         }
     }
 
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player) || !(event.getEntity() instanceof LivingEntity)) return;
+        if (ConfigGetter.config.getConfig().getBoolean("enable_hammer")) {
 
-        Player player = (Player) event.getDamager();
-        ItemStack item = player.getInventory().getItemInMainHand();
-        if (item == null || item.getType() == Material.AIR) return;
+            if (!(event.getDamager() instanceof Player) || !(event.getEntity() instanceof LivingEntity)) return;
 
-        boolean isHammer = NBT.get(item, nbt -> (boolean) nbt.getBoolean("isHammer"));
-        if (fallCounters.containsKey(player) && isHammer) {
-            if (!player.isOnGround()) {
-                double fallCount = fallCounters.get(player);
-                double damage = event.getDamage();
-                double multipliedDamage = damage * fallCount;
-                event.setDamage(multipliedDamage);
-                double totalFallDistance = fallDistance.getOrDefault(player, 0.0);
+            Player player = (Player) event.getDamager();
+            ItemStack item = player.getInventory().getItemInMainHand();
+            if (item == null || item.getType() == Material.AIR) return;
 
-                if (totalFallDistance > 10.0) {
-                    ParticleUtils.spawnParticlesAroundPlayer(player, Particle.CLOUD, 100, 0, 0, 0, 0.3);
-                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 2);
-                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GHAST_SHOOT, 1, 1);
-                    Vector impulse = new Vector(0, (totalFallDistance / 10) * 1.1, 0);
-                    player.setVelocity(impulse);
-                    Collection<Entity> nearbyEntities = player.getWorld().getNearbyEntities(player.getLocation(), 5.0, 5.0, 5.0);
-                    for (Entity nearbyEntity : nearbyEntities) {
-                        if (nearbyEntity instanceof LivingEntity && nearbyEntity != player) {
-                            Vector direction = nearbyEntity.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
-                            Vector impulse2 = direction.multiply(2.0).add(new Vector(0, 1.5, 0));;
-                            nearbyEntity.setVelocity(impulse2);
+            boolean isHammer = NBT.get(item, nbt -> (boolean) nbt.getBoolean("isHammer"));
+            if (fallCounters.containsKey(player) && isHammer) {
+                if (!player.isOnGround()) {
+                    double fallCount = fallCounters.get(player);
+                    double damage = event.getDamage();
+                    double multipliedDamage = damage * fallCount;
+                    event.setDamage(multipliedDamage);
+                    double totalFallDistance = fallDistance.getOrDefault(player, 0.0);
+
+                    if (totalFallDistance > 10.0) {
+                        ParticleUtils.spawnParticlesAroundPlayer(player, Particle.CLOUD, 100, 0, 0, 0, 0.3);
+                        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 2);
+                        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GHAST_SHOOT, 1, 1);
+                        Vector impulse = new Vector(0, (totalFallDistance / 10) * 1.1, 0);
+                        player.setVelocity(impulse);
+                        Collection<Entity> nearbyEntities = player.getWorld().getNearbyEntities(player.getLocation(), 5.0, 5.0, 5.0);
+                        for (Entity nearbyEntity : nearbyEntities) {
+                            if (nearbyEntity instanceof LivingEntity && nearbyEntity != player) {
+                                Vector direction = nearbyEntity.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
+                                Vector impulse2 = direction.multiply(2.0).add(new Vector(0, 1.5, 0));;
+                                nearbyEntity.setVelocity(impulse2);
+                            }
                         }
                     }
                 }
+                fallCounters.remove(player);
+                fallDistance.remove(player);
             }
-            fallCounters.remove(player);
-            fallDistance.remove(player);
         }
     }
 
