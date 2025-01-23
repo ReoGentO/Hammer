@@ -60,24 +60,6 @@ public class HammerCommand implements CommandExecutor {
         String subCommand = args[0].toLowerCase();
 
         switch (subCommand) {
-            case "sendmessage":
-
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage("Эту команду могут использовать только игроки!");
-                    return true;
-                }
-                if (args.length < 2) {
-                    Player player = (Player) sender;
-                    Utils.sendMessage(player, lg.error_message);
-                    return true;
-                }
-                StringBuilder messageBuilder = new StringBuilder();
-                for (int i = 1; i < args.length; i++) {
-                    messageBuilder.append(args[i]).append(" ");
-                }
-                String message = messageBuilder.toString().trim();
-                Utils.broadcastMessage(message);
-                break;
             case "give":
                 if (args.length < 3) {
                     Utils.sendMessage(sender, mm.deserialize(lg.error_message));
