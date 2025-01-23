@@ -7,6 +7,10 @@ depend: [NBTAPI]
 commands:
   hammer:
     description: "Основная команда"
-    usage: "/hammer"
+    usage: /<command>
     permission: "hammer.admin"
-    permission-message: "&cУ вас нет прав на использование этой команды!"
+    permission-message: "§cУ вас нет прав на использование этой команды!"
+  hammerreload:
+    usage: /<command>
+    permission: "hammer.admin"
+    permission-message: "§cУ вас нет прав на использование этой команды!"

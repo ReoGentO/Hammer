@@ -1,5 +1,6 @@
 package com.reogent.hammer.Utils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -24,6 +25,14 @@ public class ParticleUtils {
 
         Location playerLocation = player.getLocation();
         player.getWorld().spawnParticle(particle, playerLocation, count, offsetX, offsetY, offsetZ, speed);
+    }
+
+    public static void spawnParticlesAt(Location loc, Particle particle, int count, double offsetX, double offsetY, double offsetZ, double speed) {
+        if (loc == null || loc.getWorld() == null) {
+            return; // Проверяем, что Location и World существуют
+        }
+
+        loc.getWorld().spawnParticle(particle, loc, count, offsetX, offsetY, offsetZ, speed);
     }
 
     /**

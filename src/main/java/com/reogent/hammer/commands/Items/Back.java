@@ -1,5 +1,6 @@
 package com.reogent.hammer.commands.Items;
 
+import com.reogent.hammer.Hammer;
 import com.reogent.hammer.Utils.ItemUtils;
 import com.reogent.hammer.commands.HammerCommand;
 import org.bukkit.Material;

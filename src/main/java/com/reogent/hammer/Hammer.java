@@ -5,16 +5,16 @@ import com.reogent.hammer.Listeners.MoveListener;
 import com.reogent.hammer.Listeners.PlayerLiseners;
 import com.reogent.hammer.commands.HammerCommand;
 import com.reogent.hammer.commands.HammerTabCompleter;
+import com.reogent.hammer.files.LangConfig;
 import de.tr7zw.nbtapi.NBT;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 public final class Hammer extends JavaPlugin {
-    private ConfigManager mainconfig;
-    private ConfigManager langconfig;
     public static Hammer instance;
     private BukkitAudiences audiences;
 
@@ -31,15 +31,22 @@ public final class Hammer extends JavaPlugin {
         return super.getLogger();
     }
 
+
     @Override
     public void onEnable() {
+
+        getConfig().options().copyDefaults();
+        saveDefaultConfig();
+
+        LangConfig.setup();
+        LangConfig.get().options().copyDefaults(true);
+        LangConfig.save();
+
         if (!NBT.preloadApi()) {
             getLogger().warning("NBT-API не найден! Выключаю плагин..");
             getPluginLoader().disablePlugin(this);
             return;
         }
-        mainconfig = new ConfigManager(this, "config.yml");
-        langconfig = new ConfigManager(this, "messages.yml");
         instance = this;
         this.audiences = BukkitAudiences.create(this);
         getLogger().info("Плагин успешно загрузился!");
@@ -48,7 +55,6 @@ public final class Hammer extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerLiseners(), this);
         getCommand("hammer").setExecutor(new HammerCommand());
         getCommand("hammer").setTabCompleter(new HammerTabCompleter());
-
     }
 
     @Override
@@ -64,21 +70,7 @@ public final class Hammer extends JavaPlugin {
         return instance;
     }
 
-    public ConfigManager getMainConfig() {
-        return mainconfig;
-    }
-
-    public ConfigManager getLangConfig() {
-        return langconfig;
-    }
-
     public BukkitAudiences getAudiences() {
         return audiences;
     }
-
-    public void reloadPlugin() {
-        getServer().getPluginManager().disablePlugin(this);
-        getServer().getPluginManager().enablePlugin(this);
-    }
-
 }

@@ -1,26 +1,27 @@
 package com.reogent.hammer.Listeners;
 
 import com.reogent.hammer.ConfigGetter;
-import com.reogent.hammer.ConfigManager;
 import com.reogent.hammer.Hammer;
 import com.reogent.hammer.Utils.LangGetter;
 import com.reogent.hammer.Utils.ParticleUtils;
 import de.tr7zw.nbtapi.NBT;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
 import java.util.Collection;
@@ -29,17 +30,12 @@ import java.util.Map;
 
 
 public class ItemListeners implements Listener {
-    private static final Hammer inst = Hammer.getInstance();
-    private static final BukkitAudiences audiences = inst.getAudiences();
-    private static final MiniMessage mm = MiniMessage.miniMessage();
-    private static final LangGetter lg = new LangGetter();
-
     private final Map<Player, Double> fallCounters = new HashMap<>();
     private final Map<Player, Double> fallDistance = new HashMap<>();
 
     @EventHandler
     public void PlayerMove(PlayerMoveEvent event) {
-        if (ConfigGetter.config.getConfig().getBoolean("enable_hammer")) {
+        if (ConfigGetter.config.getBoolean("enable_hammer")) {
             Player player = event.getPlayer();
             Location from = event.getFrom();
             Location to = event.getTo();
@@ -65,7 +61,7 @@ public class ItemListeners implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (ConfigGetter.config.getConfig().getBoolean("enable_hammer")) {
+        if (ConfigGetter.config.getBoolean("enable_hammer")) {
 
             if (!(event.getDamager() instanceof Player) || !(event.getEntity() instanceof LivingEntity)) return;
 
@@ -117,13 +113,12 @@ public class ItemListeners implements Listener {
             if (isJumpItem && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && event.getHand().equals(EquipmentSlot.HAND)) {
 
                 int amount = item.getAmount();
-                Vector vector = new Vector(0, 1.5, 0);
-                player.setVelocity(vector);
+                Snowball snowball = player.launchProjectile(Snowball.class);
+                snowball.setShooter(player);
+                snowball.setMetadata("isImpulseSnowball", new FixedMetadataValue(Hammer.getInstance(), true));
 
-                ParticleUtils.spawnParticlesAroundPlayer(player, Particle.CLOUD, 150, 0, 0, 0, 0.1);
-                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 1);
-                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 2);
-                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GHAST_SHOOT, 1, 1);
+                // Эффекты и уменьшение количества предметов
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1, 1);
 
                 if (!CREATIVE) {
                     item.setAmount(amount - 1);
@@ -133,13 +128,47 @@ public class ItemListeners implements Listener {
         }
     }
 
-    private static void broadcastMessage(String message) {
-        Audience playersAudience = audiences.players();
-        playersAudience.sendMessage(mm.deserialize(message));
-    }
+    @EventHandler
+    public void onProjectileHit(ProjectileHitEvent event) {
+        if (event.getEntity() instanceof Snowball snowball &&
+                snowball.hasMetadata("isImpulseSnowball")) {
 
-    private static void sendMessage(Player player, String message) {
-        Audience playerAudience = audiences.player(player);
-        playerAudience.sendMessage(mm.deserialize(lg.prefix + message));
+            // Место столкновения снежка
+            Location impactLocation = snowball.getLocation();
+
+            // Создаем взрыв без разрушений
+            impactLocation.getWorld().createExplosion(impactLocation, 0, false, false);
+
+            // Генерация импульса
+            double radius = 5.0; // Радиус действия импульса
+            for (Entity entity : impactLocation.getWorld().getNearbyEntities(impactLocation, radius, radius, radius)) {
+                if (!(entity instanceof Player)) continue;
+
+                Player player = (Player) entity;
+//                if (player.equals(snowball.getShooter())) continue; // Пропускаем того, кто бросил снежок
+
+                // Рассчитываем вектор от эпицентра к игроку
+                Vector direction = player.getLocation().toVector().subtract(impactLocation.toVector());
+
+                // Рассчитываем расстояние до эпицентра
+                double distance = direction.length();
+
+                // Нормализуем вектор (приводим длину к 1)
+                direction.normalize();
+
+                // Модифицируем силу импульса
+                double force = Math.max(0, (radius - distance) / radius); // Сила уменьшается с расстоянием
+                direction.multiply(force * 1.5); // Увеличиваем горизонтальную силу
+                direction.setY(force * 2); // Добавляем вертикальную составляющую
+
+                // Применяем импульс к игроку
+                player.setVelocity(direction);
+            }
+            // Визуальные эффекты
+            ParticleUtils.spawnParticlesAt(snowball.getLocation(), Particle.CLOUD, 150, 0, 0, 0, 0.1);
+            impactLocation.getWorld().playSound(impactLocation, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 1);
+            impactLocation.getWorld().playSound(impactLocation, Sound.ENTITY_GENERIC_EXPLODE, 1, 2);
+            impactLocation.getWorld().playSound(impactLocation, Sound.ENTITY_GHAST_SHOOT, 1, 1);
+        }
     }
 }
